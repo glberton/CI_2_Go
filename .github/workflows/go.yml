@@ -9,23 +9,29 @@ on:
 jobs:
 
   test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        go_version: ['1.18', '1.17', '>=1.18']
+        go_version: ['1.18', '1.19']
+        os: ['ubuntu-latest', 'ubuntu-24.04']
+
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4.2.2
 
     - name: Set up Go
-      uses: actions/setup-go@v3
+      uses: actions/setup-go@v5.3.0
       with:
         go-version: ${{ matrix.go_version }}
       
     - name: Build-DB
-      run: docker-compose build
-      
+      run: docker compose build
+
     - name: Create-DB
-      run: docker-compose up -d
+      run: docker compose up -d
+
+    # PASSO NOVO: Aguarda o PostgreSQL ficar pronto
+    - name: Wait for Database
+      run: sleep 10
 
     - name: Test
       run: go test -v main_test.go 
@@ -36,8 +42,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: ['ubuntu-latest', 'ubuntu-18.04']
+        os: ['ubuntu-latest', 'ubuntu-24.04']
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4.2.2
     - name: Build
       run: go build -v main.go
